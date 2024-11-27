@@ -1,0 +1,10 @@
+name = "DictMap"
+uuid = "a05f2ffc-8bb7-4579-883d-9dc27fa701ed"
+authors = ["kewiechecki <kaw504@nyu.edu>"]
+version = "0.1.0"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+
+[compat]
+DataFrames = "1.7.0"
