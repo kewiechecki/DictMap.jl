@@ -1,5 +1,0 @@
-module DictMap
-
-greet() = print("Hello World!")
-
-end # module DictMap
