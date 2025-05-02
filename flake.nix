@@ -18,48 +18,34 @@
           # config.cudaSupport = system == "x86_64-linux";
 		};
 
-        # Get library paths from the stdenv compiler and from gfortran.
-        # gccPath = toString pkgs.stdenv.cc.cc.lib;
-        # gfortranPath = toString pkgs.gfortran;
+        juliaPkgs = pkgs.juliaPackages;
 
-        # Define the multi-line Julia script.
-        # NOTE: The closing delimiter (two single quotes) MUST be flush with the left margin.
-        juliaScript = ''
-using Pkg
-Pkg.instantiate()
+		shellPkgsNested = with pkgs; [
+		  julia 
+		  git
+		];
 
-Pkg.precompile()
-using DictMap
-'';
+        shellPkgs = pkgs.lib.flatten shellPkgsNested;
 
-		
+        dictMapBuilt = juliaPkgs.buildJuliaPackage {
+          pname = "DictMap";
+          version = "0.1.1"; # TODO: FIX THIS
+          src = ./.;
+          propagatedBuildInputs = [  ];
+		};
+
       in {
         # A derivation for your package.
-        packages.autoencoders = pkgs.stdenv.mkDerivation {
-          name = "DictMap.jl";
-          src = ./.;
-          # If your package is purely interpreted, no build phase is needed.
-          # You can extend this if you have precompilation or other build steps.
-        };
+        packages.dictMap = dictMapBuilt;
+        packages.default = self.packages.${system}.dictMap;
 
         # A development shell that provides Julia with your package instantiated.
         devShell = with pkgs; mkShell {
           name = "autoencoders-dev-shell";
-          buildInputs = [ 
-		    julia 
-			git
-			# stdenv.cc
-			# gfortran
-		  ];
+          buildInputs = shellPkgs;
           shellHook = ''
 source ${git}/share/bash-completion/completions/git-prompt.sh
-
-cat > julia_deps.jl <<'EOF'
-${juliaScript}
-EOF
-
-# Activate the project and instantiate dependencies.
-julia --project=. julia_deps.jl
+export JULIA_PROJECT="@."
           '';
         };
       }
